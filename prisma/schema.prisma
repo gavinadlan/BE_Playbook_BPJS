@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id                        Int       @id @default(autoincrement())
+  name                      String
+  email                     String    @unique
+  password                  String
+  role                      Role      @default(USER) 
+  isVerified                Boolean   @default(false)
+  verificationToken         String?   @unique
+  resetPasswordToken        String?   @unique
+  resetPasswordTokenExpiry  DateTime?
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+  lastVisited               DateTime? 
+  pksFiles                  Pks[]
+}
+
+model Pks {
+  id          Int       @id @default(autoincrement())
+  originalName String
+  filename    String
+  path        String
+  company     String
+  status      Status    @default(PENDING)
+  submittedAt DateTime  @default(now())
+  approvedAt  DateTime?
+  rejectedAt  DateTime?
+  reason      String?
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+enum Status {
+  PENDING
+  APPROVED
+  REJECTED
+}
